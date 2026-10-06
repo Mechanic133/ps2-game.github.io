@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPS2 File Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .features {
+            list-style: none;
+        }
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .features li:before {
+            content: "✅ ";
+            color: #00ff88;
+            margin-right: 8px;
+        }
+        .files {
+            display: grid;
+            gap: 12px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #00d4ff;
+            transition: all 0.3s;
+        }
+        .file-item:hover {
+            background: rgba(0, 212, 255, 0.15);
+            transform: translateX(5px);
+        }
+        .file-name {
+            font-weight: 500;
+            color: #fff;
+        }
+        .file-size {
+            color: #888;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .download-btn {
+            background: #00d4ff;
+            color: #1a1a2e;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        .download-btn:hover {
+            background: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            color: #00ff88;
+            font-size: 0.9em;
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 3px solid #00d4ff;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e0e0e0;
+        }
+        .warning {
+            background: rgba(255, 200, 0, 0.1);
+            border-left: 3px solid #ffc800;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+        .warning strong { color: #ffc800; }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #666;
+            font-size: 0.9em;
+        }
+        a { color: #00d4ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 MyPS2 File Manager</h1>
+            <p class="subtitle">Свой файловый менеджер и загрузчик игр для PlayStation 2</p>
+        </header>
+
+        <div class="card">
+            <h2>📖 О проекте</h2>
+            <p>Минималистичный файловый менеджер для PS2, написанный на C с использованием PS2SDK. Позволяет просматривать файлы на USB-флешке, запускать ELF-приложения и скачивать игры прямо с HTTP-сервера через Ethernet.</p>
+        </div>
+
+        <div class="card">
+            <h2>✨ Возможности</h2>
+            <ul class="features">
+                <li>Просмотр файлов и папок на USB (FAT32)</li>
+                <li>Запуск ELF-приложений прямо из меню</li>
+                <li>Скачивание игр с HTTP-сервера по сети</li>
+                <li>Показ размера файлов</li>
+                <li>Удаление файлов</li>
+                <li>Запуск скачанных игр сразу после загрузки</li>
+                <li>Навигация с геймпада (D-Pad)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📦 Доступные файлы</h2>
+            <div class="files">
+                <div class="file-item">
+                    <div>
+                        <span class="file-name">myFileMan.elf</span>
+                        <span class="file-size">— 2.5 MB</span>
+                    </div>
+                    <a href="files/myFileMan.elf" class="download-btn">Скачать</a>
+                </div>
+                <div class="file-item">
+                    <div>
+                        <span class="file-name">FCEU.elf</span>
+                        <span class="file-size">— Эмулятор NES, 1.0 MB</span>
+                    </div>
+                    <a href="files/FCEU.elf" class="download-btn">Скачать</a>
+                </div>
+                <div class="file-item">
+                    <div>
+                        <span class="file-name">wLaunchELF.elf</span>
+                        <span class="file-size">— Файловый менеджер, 1.6 MB</span>
+                    </div>
+                    <a href="files/wLaunchELF.elf" class="download-btn">Скачать</a>
+                </div>
+            </div>
+            <div class="warning">
+                <strong>⚠️ Внимание:</strong> ELF-файлы должны лежать в папке <code>files/</code> в вашем репозитории. Обновите ссылки, если имена файлов другие.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🚀 Как установить</h2>
+            <p>1. Скопируйте <code>myFileMan.elf</code> на USB-флешку (FAT32).</p>
+            <p>2. Вставьте флешку в PS2.</p>
+            <p>3. Запустите через <code>uLaunchELF</code> или FMCB.</p>
+            <p>4. В программе нажмите <strong>правую стрелку</strong> для перехода к списку игр с сайта.</p>
+            <p>5. Выберите игру и нажмите <strong>X</strong> для скачивания.</p>
+        </div>
+
+        <div class="card">
+            <h2>🛠️ Сборка</h2>
+            <p>Проект собирается с использованием <code>PS2SDK</code>:</p>
+            <pre><code>git clone https://github.com/USERNAME/myFileMan.git
+cd myFileMan
+make clean
+make</code></pre>
+            <p>Результат — файл <code>myFileMan.elf</code>.</p>
+        </div>
+
+        <div class="card">
+            <h2>📄 Управление</h2>
+            <ul class="features">
+                <li><strong>D-Pad ↑↓</strong> — навигация</li>
+                <li><strong>X</strong> — запустить ELF / войти в папку</li>
+                <li><strong>O</strong> — выйти в родительскую папку</li>
+                <li><strong>SELECT</strong> — удалить файл</li>
+                <li><strong>→</strong> — переключиться на список с сайта</li>
+                <li><strong>←</strong> — вернуться к локальным файлам</li>
+                <li><strong>START</strong> — выход</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>MyPS2 File Manager — проект с открытым исходным кодом.</p>
+            <p>Сделано с ❤️ для PS2-сообщества.</p>
+        </footer>
+    </div>
+</body>
+</html>
