@@ -1,0 +1,463 @@
+                +-8888888b.   .d8888b.  8888888888 888b    888-+
+                | 888   Y88b d88P  Y88b 888        8888b   888 |
+                | 888    888 888    888 888        88888b  888 |
+            +---+ 888   d88P 888        8888888    888Y88b 888 +---+
+          +-|---+ 8888888P"  888  88888 888        888 Y88b888 +---|-+
+          | |   | 888        888    888 888        888  Y88888 |   | |
+          | |   | 888        Y88b  d88P 888        888   Y8888 |   | |
+        +-|-+   +-888         "Y8888P88 8888888888 888    Y888-+   +-|-+
+   +----+ +----------------------------------------------------------+ +----+
+   |  PGEN v1.0 BETA - Sega Genesis/Megadrive emulator for the Playstation2 |
+   |                                                                        |
+   +-+            PS2 Specific code by Nick Van Veen (Sjeep)              +-+
+   ++|    Based on source code from Generator, coded by James Ponder      |++
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                          Introduction                              |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | PGEN is a Sega Genesis/Megadrive emulator for the PS2.  It began       |
+   | as a port of Generator, an open source emulator for Linux, written     |
+   | by James Ponder. Since then, PGEN has evolved to be much more than     |
+   | that. The compatibility rate is very high and the speed is practically |
+   | perfect with stereo sound.                                             |
+   |                                                                        |
+   | PGEN is freeware and can be downloaded at http://pgen.gamebase.ca. You |
+   | will also find forums there for support and comments. Please do not    |
+   | ask for ROMs or distribute this program with ROMs. We do not condone   |
+   | such behavior.                                                         |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                 Current features in v1.0 BETA:                     |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | - Compatible with .SMD and .BIN rom format                             |
+   | - High speed emulation with stereo sound (at 24Khz)                    |
+   | - Two types of sprite rendering: Cell and Line.                        |
+   |   Cell is faster but less accurate.                                    |
+   | - Pal/NTSC rom autodetect                                              |
+   | - Supports SRAM saves and saved states (which are compressed)          |
+   | - Memory card manager to manipulate PGEN save data                     |
+   | - Very configurable (and options get saved to memory card)             |
+   | - Quick savestate function, does not write to memcard                  |
+   | - Screen positioning                                                   |
+   | - Dual-shock controller analog stick support                           |
+   | - Cool GUI with music                                                  |
+   | - Automatic ROM detection (no FILES.TXT needed!)                       |
+   | - Support for multiple levels of rom directories                       |
+   | - Implementation of new filesystem driver (thanks Hiryu!)              |
+   |   Long ROM name support (no longer limited to 8.3 format)              |
+   |   No limit on number of files in a subdirectory                        |
+   | - Support for swapping ROM cd's without restarting the emulator        |
+   | - Support for customising the music played in the menu screen          |
+   | - Compatibility with old Japanese consoles                             |
+   | - DMS3 Dev.olution mode compatibile                                    |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                           To-do List:                              |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | - Add support for zipped roms                                          |
+   | - Configurable controls                                                |
+   | - Fix any remaining bugs                                               |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                    Creating a PGEN Compilation                     |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | In order to use PGEN, you will need to know how to boot cdrs on your   |
+   | PS2. We can not provide help in this area, please seek information on  |
+   | this from a PS2 related website or forum such as http://ps2newz.net    |
+   |                                                                        |
+   | A few things have changed for PGEN v1.0 BETA in the way a compilation  |
+   | it made. There are certain files required to be present for the CD to  |
+   | boot (these files are SYSTEM.CNF, PGEN_B1.ELF, the MODULES directory   |
+   | and the .IRX files inside this directory). Roms and music (.MOD) files |
+   | are not *required* for PGEN to boot. PGEN v1.0 BETA works differently  |
+   | from previous versions in that it supports loading roms from the CD    |
+   | that PGEN boots on, or from another CD which is inserted after PGEN    |
+   | has booted. Which ever option you choose, the roms will need to be     |
+   | placed in a directory called "Roms" in the root directory of the CD.   |
+   | This is the base rom directory. The PGEN romlist is built according to |
+   | the layout of the filesystem, relative to the base rom directory. This |
+   | means that you can have many sub-directories that span off the base    |
+   | rom directory, and any of these directories (including the base rom    |
+   | directory) may contain up to 4000 roms. So, you can use directories to |
+   | categorise your rom files. You may also want to keep things simple, so |
+   | you could just throw all your roms into the base rom directory.        |
+   |                                                                        |
+   | PGEN will use the filenames of roms when building the romlist - it     |
+   | will not scan rom headers to get the rom name (this would take far too |
+   | much time). This means that if a rom's filename was "Sonic the Hedgehog|
+   | 2 (JUE) [!].smd", it will appear as "Sonic the Hedgehog 2 (JUE) [!]"   |
+   | in the romlist. We suggest using the GoodGEN utility to rename your    |
+   | roms to use the standard rom naming convention. You can download the   |
+   | GoodGEN utility from the PGEN website.                                 |
+   |                                                                        |
+   | NOTE: Roms MUST have either a ".bin" or ".smd" extension to be         |
+   |       recognised by PGEN.                                              |
+   |                                                                        |
+   | With PGEN v1.0 BETA, you can customise the music which gets played in  |
+   | the PGEN menu screen. PGEN loads music from a directory named MUSIC in |
+   | the root directory of the CD. You can simply use the music files (.MOD |
+   | format) which come in the PGEN archive - or you could replace these    |
+   | files with your own. PGEN will use up to 16 .MOD files from the MUSIC  |
+   | directory.                                                             |
+   |                                                                        |
+   | If you have an old Japanese unit (10k, 15k, 18k) then you must find a  |
+   | file called "LIBSD.IRX" on one of your PS2 game CD's and copy this to  |
+   | the MODULES directory of your PGEN compilation. If you have one of the |
+   | old Jap units and you do not do this, PGEN will be unable to output    |
+   | sound.                                                                 |
+   |                                                                        |
+   | DMS3 Dev.olution Mode                                                  |
+   | ---------------------                                                  |
+   | If you have a DMS3 modchip installed, it is possible to install PGEN   |
+   | on your memory card, then boot PGEN using the DMS Explorer rather than |
+   | booting from a CD. In order to install PGEN on your memory card for use|
+   | with DMS Explorer, simply burn a CD which contains all the files from  |
+   | the PGEN archive to create your PGEN installation CD. Then, go into    |
+   | DMS explorer, make sure your PGEN installation CD is in the drive, and |
+   | press SELECT to initiate the installation process. Once the            |
+   | installation is complete, you may start PGEN from DMS Explorer.        |
+   |                                                                        |
+   | For more information on the DMS3 modchip or Dev.olution mode, please   |
+   | refer to the DMS3 website: http://www.dms3.com. Please note also that  |
+   | I can not offer any support for problems specifically related to using |
+   | PGEN in Dev.olution mode.                                              |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                         In-Game Controls                           |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   |   Genesis - PS2                                                        |
+   |   -------------                                                        |
+   |   D-Pad   - D-Pad or left analog stick                                 |
+   |   Start   - Start                                                      |
+   |   A       - Square                                                     |
+   |   B       - X                                                          |
+   |   C       - Circle                                                     |
+   |   X       - L1                                                         |
+   |   Y       - R1                                                         |
+   |   Z       - Triangle                                                   |
+   |   Mode    - L2                                                         |
+   |                                                                        |
+   |   Select on PS2 controller = enter ingame menu                         |
+   |                                                                        |
+   | NOTE: If you are having problems with 6-button gamepad emulation, or   |
+   |       just want to disable it, hold down L2 when starting a game to    |
+   |       forcefully disable 6-button gamepad emulation.                   |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                           PGEN Usage                               |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | NOTICE: You can not use saved states from RC1 with v1.0. You wont need |
+   |         to delete your old saves, you can still use them with RC1.     |
+   |                                                                        |
+   | GUI controls:                                                          |
+   | -------------                                                          |
+   | While navigating the GUI, use the up and down arrows on the d-pad to   |
+   | change selection, X to confirm selection and triangle to return to the |
+   | previous dialog.                                                       |
+   |                                                                        |
+   | Rom list:                                                              |
+   | ---------                                                              |
+   | Use the d-pad to navigate through the rom list. Up/Down scroll one     |
+   | item at a time, Left/Right scroll one page at a time. L1 places the    |
+   | selection at the top of the romlist, L2 places the selection at the    |
+   | bottom. If you scroll past the top rom, the selection will warp to the |
+   | bottom rom, and vice-versa. Once you have made your selection press X. |
+   | If a directory was selected, the romlist will change into that         |
+   | directory. If a rom was selected, emulation of that rom will start.    |
+   |                                                                        |
+   |    Swapping rom CD's                                                   |
+   |    =================                                                   |
+   |    You can swap rom CD's by entering the rom list and pressing circle  |
+   |    on the player 1 joypad. This will bring up a dialog telling you to  |
+   |    press START once you have swapped CD's. It will also spin the CD    |
+   |    down, to accommodate for swap-trick users. Once you have swapped     |
+   |    CD's, press START and the CD will be scanned and the romlist will   |
+   |    be created.                                                         |
+   |                                                                        |
+   | Options menu:                                                          |
+   | -------------                                                          |
+   | The options menu is used to configure PGEN. If a memory card is        |
+   | present in slot 1, the options will be saved to the memory card and    |
+   | restored next time you start PGEN. Below is a description of each      |
+   | setting available in the options menu:                                 |
+   |                                                                        |
+   | Region: This is the region that will be emulated. If set to AUTO, PGEN |
+   |         will auto-detect the correct region for each rom when it loads.|
+   |         If set to USA, Europe or Japan, the selected region will be    |
+   |         forced.                                                        |
+   |                                                                        |
+   | Default Region: Some ROM's are designed for all regions.               |
+   |                 If this situation arises, PGEN will emulate the        |
+   |                 default region.                                        |
+   |                                                                        |
+   | Renderer: Use this option to select the rendering engine which will be |
+   |           used to render the genesis display. The CELL engine is much  |
+   |           faster than the LINE renderer, but does not render some games|
+   |           properly. The LINE renderer is slower, but much more         |
+   |           accurate.                                                    |
+   |                                                                        |
+   | Sound: Switch sound emulation on or off.                               |
+   |                                                                        |
+   | MultiMode TV: If this option is enabled, the PS2 will switch the TV    |
+   |               video mode to the emulated video mode when you start     |
+   |               emulation of each rom. For example, if you are using a   |
+   |               PAL PS2 and you run a NTSC rom, the video mode of your   |
+   |               TV will be changed from PAL to NTSC. This is useful,     |
+   |               because it gets the roms running at the correct speed.   |
+   |               This option should ONLY be enabled if your TV supports   |
+   |               both the PAL and NTSC signal.                            |
+   |                                                                        |
+   | Reposition screen: Press and hold X while this option is selected to   |
+   |                    reposition the display. While X is being held down, |
+   |                    use the d-pad to move the display.                  |
+   |                                                                        |
+   | Frame counter: If this option is enabled, a framecounter will be       |
+   |                displayed below the genesis display during emulation.   |
+   |                                                                        |
+   | In-game menu:                                                          |
+   | -------------                                                          |
+   | During emulation, press SELECT to bring up the ingame menu. From here  |
+   | you can save/load the game state and change the rendering settings.    |
+   | Below is a description of each setting available in the ingame menu:   |
+   |                                                                        |
+   | Quick Save State: Quickly saves the game state to RAM (not to the      |
+   |                   memory card).                                        |
+   | Quick Load State: Quickly loads the game state from RAM.               |
+   | MC Save State: Compresses the game state and saves to the memory card. |
+   | MC Load State: Loads the game state for the game currently being       |
+   |                emulated from the memory card.                          |
+   | MC Flush SRAM: If a game supports SRAM saves, this will write the SRAM |
+   |                save to the memory card. This isnt usually necessary,   |
+   |                as SRAM saving/loading is transparent (SRAM is loaded   |
+   |                when you start a playing a rom, saved when you return   |
+   |                to the main menu).                                      |
+   | Renderer: Changes the rendering engine ingame.                         |
+   | Region: Changes the region ingame. However, this will only come into   |
+   |         effect after a soft reset.                                     |
+   | Soft Reset: Resets emulation of the current game.                      |
+   |                                                                        |
+   | You may also reposition the screen from the In-game menu. To do this,  |
+   | hold down select and use the d-pad to reposition the display.          |
+   |                                                                        |
+   | Memory card manager:                                                   |
+   | --------------------                                                   |
+   | The memory card manager is used to manipulate PGEN save data. From the |
+   | memory card manager dialog, you can see how much space is free on the  |
+   | memory card, see the total amount of space taken up by PGEN saves, see |
+   | how much space each individual save takes up, and most importantly     |
+   | delete saves.                                                          |
+   |                                                                        |
+   | Navigate through the list of saves using the up/down arrows on the     |
+   | d-pad. To delete a save, make your selection and press X. You will then|
+   | be asked for confirmation to delete. Select "yes" and press X again.   |
+   |                                                                        |
+   | Note: Save names prefixed with "(SR)" are SRAM saves. All others are   |
+   | saved states.                                                          |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                               FAQ                                  |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | 1) How do I get this to run on my Playstation 2?                       |
+   |                                                                        |
+   |        You need a way to play CD-rs.  This either requires a modchip or|
+   |        some type of boot disc, like a Gameshark 2 or Action Replay 2.  |
+   |                                                                        |
+   | 2) Ok, I downloaded all the files off the website. How do I make a cd? |
+   |                                                                        |
+   |        There is a step-by-step guide, (with pictures), on how to get   |
+   |        you going.                                                      |
+   |                                                                        |
+   | 3) I burned the cd but it doesn't work.  What now?                     |
+   |                                                                        |
+   |        If you want more help, vist us at #ps2-emulation on Efnet or    |
+   |        post on the forums at http://pgen.gamebase.ca.                  |
+   |                                                                        |
+   | 4) I downloaded a bin/cue from somewhere but it doesn't work.  Can you |
+   |    help me?                                                            |
+   |                                                                        |
+   |        No.  We do not condone distribution of so-called "rompacks."    |
+   |        Use the directions at the PGEN website or forums to make your   |
+   |        own compilation CD.                                             |
+   |                                                                        |
+   | 5) Sound is too slow/fast!                                             |
+   |                                                                        |
+   |        If possible, make sure that the emulated video mode is the      |
+   |        same as your PS2 video mode. If the emulated video mode does    |
+   |        not match the video mode of your PS2, the emulated game will    |
+   |        not run at the correct speed. Eg: If a PAL video mode is being  |
+   |        being emulated (region = Europe) but your PS2 it using a NTSC   |
+   |        video mode, than the game will run 20% faster than it should,   |
+   |        which means that the music will run 20% faster too.             |
+   |                                                                        |
+   | 6) Can I come on to the #ps2-emulation IRC channel or the PGEN forum   |
+   |    and request roms?                                                   |
+   |                                                                        |
+   |        No. If you try this, you will be banned.                        |
+   |                                                                        |
+   | 7) When I try to load a saved state from RC1, I get an "Incompatible   |
+   |    saved state!" error. Why is this?                                   |
+   |                                                                        |
+   |        You can not use saved states from RC1 with RC2.                 |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                             History                                |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   |   16th April, 2003: v1.0 BETA - Changes include:                       |
+   |                                                                        |
+   | - Lots of bugfixes                                                     |
+   | - Disclaimer only showed on first use (if you have a memory card)      |
+   | - Added support for swapping ROM cd's                                  |
+   | - Added support for customising the music played in the menu screen    |
+   | - Added old Japanese console compatibility                             |
+   | - Removed crypto protection code                                       |
+   | - Speedups                                                             |
+   |                                                                        |
+   |   2nd August, 2002: RC2 beta - Changes include:                        |
+   |                                                                        |
+   | - Minor speed increase                                                 |
+   | - Fixed bug in pag code (you can now use an old PS1 digital controller)|
+   | - Fixed "red screen of death" bug (added checksum fixer)               |
+   | - Added proper region emulation, improved region detection code        |
+   | - Made selector loop in ingame menu and romlist                        |
+   | - Fixed FPS counter position with NTSC video mode                      |
+   | - Additions to the ingame menu: Soft reset, Region selection, Screen   |
+   |   repositioning                                                        |
+   | - Now include screen position in saved options                         |
+   | - Spin down CD when not in use                                         |
+   | - Added emulation of 6-button genesis controller                       |
+   | - Added support for subdirs inside the base rom directory              |
+   | - Added shortcuts in romlist: L1 to move to top of list, L2 to move to |
+   |   bottom                                                               |
+   |                                                                        |
+   |   21st July, 2002:  RC1 beta - First official release                  |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                             Contact                                |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | PGEN Homepage: http://pgen.gamebase.ca                                 |
+   |                                                                        |
+   | Nick Van Veen (aka Sjeep) - PGEN Author                                |
+   | - e-mail: sjeep@gamebase.ca                                            |
+   | - IRC: Sjeep, on EFNet                                                 |
+   |                                                                        |
+   | For PS2-Emulation related news, please visit #ps2-emulation on EFNet   |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                        Credits/Greetz etc                          |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   |                              CREDITS                                   |
+   |                              -------                                   |
+   |                                                                        |
+   | PS2 specific code, as well as many additions to the emulation core by  |
+   |                     Nicholas Van Veen (aka Sjeep)                      |
+   |                                                                        |
+   |     Generator, the emulator which PGEN is based on, was written by     |
+   |                            James Ponder                                |
+   |                                                                        |
+   | The PSG and FM emulation code comes from the Gens emulator, written by |
+   |                              Stephane                                  |
+   |                                                                        |
+   | The line rendering engine is based on rendering code from dgen-sdl, by |
+   |                     Joe Groff and Phil K. Hornung                      |
+   |                                                                        |
+   |      The mod player used in the main menu was written by Vzzrzzn       |
+   |                                                                        |
+   |      SIF CMD/RPC code comes from ps2lib written by Gustavo Scotti      |
+   |                                                                        |
+   |   Most of the code for the new CDVD filesystem driver was written by   |
+   |                                 Hiryu                                  |
+   |                                                                        |
+   |              The memory card icon was created by Nikorasu              |
+   |                                                                        |
+   |      The GFX library used in PGEN is based on gfxpipe, by Vzzrzzn      |
+   |                                                                        |
+   |                      Padlib was written by Pukko                       |
+   |                                                                        |
+   |    The background gfx used in the menu was created by Alberto Lopez    |
+   |                                                                        |
+   |                              THANKS TO:                                |
+   |                              ----------                                |
+   | Special thanks goes to the DMS team. They have chosen to sponsor me    |
+   | and my projects, and it is because of them that PGEN has been revived  |
+   |                   and will continue to be developed.                   |
+   |                                                                        |
+   |       Hiryu for helping out with the memory card code, multiple        |
+   |               drawing buffer code and the CDVD FS driver               |
+   |                                                                        |
+   |         RUNTiME for helping out with many things along the way         |
+   |                                                                        |
+   |    Adk & others for writing Naplink which was used to develop PGEN     |
+   |                                                                        |
+   | All the people who donated money, to help me replace my broken monitor |
+   |                                                                        |
+   |    The Unknown artists who composed the excellent MOD files used in    |
+   |                                 the menu                               |
+   |                                                                        |
+   | HyperG, Bgnome and MoRpHiUs for creating tutorials, documents websites |
+   |                            etc related to PGEN                         |
+   |                                                                        |
+   |    Justice7 for providing webspace and a forum for the PGEN website    |
+   |                                                                        |
+   |             Macho and R35|D3NT for lots of support, and being          |
+   |                              very helpful                              |
+   |                                                                        |
+   |          The BETA testers: Macho, justice7, Sk8rPunk, R35|D3NT,        |
+   |        Buttheaduk, MoRpHiUs, SniperKilla, Nikorasu, Bgnome, HyperG     |
+   |                                                                        |
+   |     Everybody at the Gamebase forums for providing LOTS of support.    |
+   |                             You guys RULE!                             |
+   |                                                                        |
+   |                               GREETZ                                   |
+   |                               ------                                   |
+   |                                                                        |
+   | Adresd, Nagra, Oobles, Dreamtime, LongChair, Scorpzr, Struct2, Vzzrzzn,|
+   | now3d, Karmix, Jules, Adk, Hiryu, Gustavo, Pukko, Duke, Dayta, Herben  |
+   |    BigBoy, Nikorasu, RUNTiME and anybody that I forgot to mention :)   |
+   +-+                                                                    +-+
+   +++--------------------------------------------------------------------+++
+   +++--------------------------------------------------------------------+++
+   ++|                            Legalese                                |++
+   +++--------------------------------------------------------------------+++
+   +-+                                                                    +-+
+   | This software is not endorsed by Sony Computer Entertainment Inc. or   |
+   | SEGA Inc. in any way. This software is produced without the use of any |
+   | copyrighted material which belongs to Sony Computer Entertainment Inc, |
+   | or SEGA Inc, or any other party.                                       |
+   |                                                                        |
+   | Companies and all products pertaining to that company are trademarks of|
+   | that company. Please contact the appropriate company for trademark and |
+   | copyright information.                                                 |
+   |                                                                        |
+   | This software should only be used to play games which the user         |
+   | legally owns.                                                          |
+   |                                                                        |
+   | This software must never be distributed with any copyrighted games or  |
+   | other material. Any breach of these terms is out of the authors control|
+   | and is not at the authors consent.                                     |
+   |                                                                        |
+   | PGEN is FREE software. If you bought this, you have been ripped off.   |
+   +-+                                                                    +-+
+   ++----------------------------------------------------------------------++
+   ++                                                   Layout by MoRpHiUs ++
+   +++    +----+    +----+          ____          +----+    +----+        +++
+   +-|---------|---------|---------(0  o)--------------|---------|--------|-+
+     +----+    +----+    +-----oo0--(__)--0oo-----+    +----+    +--------+
